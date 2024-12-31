@@ -1,0 +1,13 @@
+pandas
+ttkthemes
+
+pillow
+tkintermapview
+python-dotenv
+psycopg2 
+sqlalchemy 
+pandas
+dotenv
+dash_bootstrap_components
+dash
+flask
