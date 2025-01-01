@@ -1,9 +1,17 @@
 # Tseng, De-Jung
 ## About Me
-* A Neuroscrientist 
+* A Neuroscrientist
+* Interested in smart health product deveploing
+* Familiar with data mining and UX design
+  
 ## My Works
-### Python Windows
-### Python Flask webpages
 ### RWD webpage
+
+### Python Windows
+* Based on the package of Themed TK
+* Personalized movie recommandation system
+#### 
+### Python Flask webpages
+
 
 
