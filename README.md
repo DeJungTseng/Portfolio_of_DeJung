@@ -1,2 +1,9 @@
-# Portfolio_of_DeJung
-Including front-end (TK window, Flask and RWD FrontPages ) and mini programs.
+# Tseng, De-Jung
+## About Me
+* A Neuroscrientist 
+## My Works
+### Python Windows
+### Python Flask webpages
+### RWD webpage
+
+
