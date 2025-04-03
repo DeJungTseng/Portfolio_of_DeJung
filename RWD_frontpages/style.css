@@ -288,13 +288,43 @@ body{
 }
 .footer h6{}
 .footer p{}
-
+.footer a{
+    color: white;
+    text-decoration: none;
+}
 
 
 
 
 /*平板*/
 @media screen and (max-width:1200px) and (min-width:769px){
+    .banner {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 100%; /* 改用 min-height 確保高度至少涵蓋內容 */
+        background-size: cover; /* 讓背景圖適應容器大小 */
+        background-repeat: no-repeat; /* 防止背景圖重複 */
+        position: relative; /* 確保子元素可以定位 */
+    }
+
+    /* Email field 的容器樣式（假設 .email-field 是輸入框的父容器） */
+    .email-field {
+        position: absolute; /* 讓輸入框相對 .banner 定位 */
+        bottom: 20px; /* 距離底部 20px，可調整 */
+        left: 50%; /* 水平居中 */
+        transform: translateX(-50%); /* 水平居中的輔助 */
+    }
+
+    .email-field input {
+        width: 300px; /* 設定輸入框寬度，可根據需求調整 */
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .email-field button {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
     .flow ul{
         flex-wrap: wrap;
     }
@@ -320,12 +350,39 @@ body{
  
 /*手機*/
 @media screen and (max-width:768px){
+    .banner {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 100%; /* 改用 min-height 確保高度至少涵蓋內容 */
+        background-size: cover; /* 讓背景圖適應容器大小 */
+        background-repeat: no-repeat; /* 防止背景圖重複 */
+        position: relative; /* 確保子元素可以定位 */
+    }
+
+    /* Email field 的容器樣式（假設 .email-field 是輸入框的父容器） */
+    .email-field {
+        position: absolute; /* 讓輸入框相對 .banner 定位 */
+        bottom: 20px; /* 距離底部 20px，可調整 */
+        left: 50%; /* 水平居中 */
+        transform: translateX(-50%); /* 水平居中的輔助 */
+    }
+
+    .email-field input {
+        width: 300px; /* 設定輸入框寬度，可根據需求調整 */
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .email-field button {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
     .flow ul{
         flex-wrap: wrap;
     }
     .flow li{
         width: 100%;
-        height: 300px;
+        height: 210px;
     }
     .flow img{
         width:10%;
