@@ -11,3 +11,4 @@ dotenv
 dash_bootstrap_components
 dash
 flask
+pickle
