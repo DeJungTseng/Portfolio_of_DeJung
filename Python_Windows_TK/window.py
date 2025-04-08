@@ -8,10 +8,23 @@ from tkinter import messagebox
 class Window(ThemedTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # First handle login before creating any widgets
+        self.withdraw()  # Hide main window
+        self.login_dialog = view.LoginDialog(self, title="登入")
+        
+        # If login failed or was cancelled, close the application
+        if not self.login_dialog.result:
+            print("Login cancelled or failed")
+            self.quit()
+            self.destroy()  # Ensure window is properly destroyed
+            return
+            
+        # Only proceed with window setup if login was successful
+        print("Login successful, initializing main window")
         self.title('Watch new movie now!')
         
         # ====Geometry====
-        # 設定視窗大小並置中
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         window_width = 1200
@@ -20,21 +33,14 @@ class Window(ThemedTk):
         position_y = (screen_height - window_height) // 2
         self.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
         
-        # 禁止改變大小
         self.resizable(False, False)
         # =====End Geometry=====
         
-        # 創建所有視窗元件
+        # Create widgets only after successful login
         self.create_widgets()
         
-        # 處理登入對話框
-        self.withdraw()  # 隱藏主視窗
-        self.login_dialog = view.LoginDialog(self, title="登入")
-        
-        # 如果登入對話框被取消，關閉應用程序
-        if not self.login_dialog.result:
-            self.quit()
-            return
+        # Show the main window
+        self.deiconify()
 
     def create_widgets(self):
         # 設定樣式

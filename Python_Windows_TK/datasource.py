@@ -174,6 +174,62 @@ def convert_dataframe_to_movie_list(df):
 import pandas as pd
 
 
+def get_user_id_pw(username):
+    """
+    Query user credentials from the user_id_table in PostgreSQL
+    
+    Args:
+        username: The username to look up
+        
+    Returns:
+        tuple: (user_id, password) if found, (None, None) if not found or error
+    """
+    print(f"[get_user_id_pw] Looking up credentials for username: {username}")
+    
+    try:
+        conn_params = {
+            'host': os.environ['postgres_host'],
+            'database': os.environ['postgres_db'],
+            'user': os.environ['postgres_user'],
+            'password': os.environ['postgres_password']
+        }
+        print("[get_user_id_pw] Database connection parameters loaded from environment")
+
+        # SQL query to get user credentials
+        query = """
+        SELECT movie_user_id, movie_user_pw
+        FROM public.user_id_table
+        WHERE movie_user_id = %s;
+        """
+
+        # Establish database connection
+        print("[get_user_id_pw] Connecting to database...")
+        conn = psycopg2.connect(**conn_params)
+        cursor = conn.cursor()
+        
+        # Execute query with username parameter
+        print(f"[get_user_id_pw] Executing query for username: {username}")
+        cursor.execute(query, (username,))
+        result = cursor.fetchone()
+        
+        if result:
+            print(f"[get_user_id_pw] Found credentials for username: {username}")
+            return result[0], result[1]  # Return user_id and password
+            
+        print(f"[get_user_id_pw] No credentials found for username: {username}")
+        return None, None  # User not found
+
+    except (Exception, psycopg2.Error) as error:
+        print(f"[get_user_id_pw] Database error: {error}")
+        return None, None
+
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'conn' in locals() and conn:
+            conn.close()
+            print("[get_user_id_pw] Database connection closed")
+
 def get_movie_genres():
     """
     取得電影類型分佈並將其轉換為指定格式

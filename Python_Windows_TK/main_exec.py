@@ -1,8 +1,13 @@
+from view import login_dialog
 import numpy as np
 import pandas as pd
 from tkinter import messagebox
 import datasource
 from window import Window
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 class MainExec:
     def __init__(self):
@@ -111,6 +116,33 @@ class MainExec:
         print("Processing movie data...")
         # Placeholder for now
         return True
+        
+def validate_login(username, password):
+    """驗證登入資訊
+    
+    Args:
+        username: The username from LoginDialog's entry
+        password: The password from LoginDialog's entry
+        
+    Returns:
+        bool: True if credentials are valid, False otherwise
+    """
+    print(f"[validate_login] Validating credentials for username: {username}")
+    
+    # Query credentials from database using the provided username
+    stored_username, stored_password = datasource.get_user_id_pw(username)
+    print(f"[validate_login] Database returned stored_username: {stored_username}")
+    
+    # Check if user exists and password matches
+    if stored_username is None:
+        print("[validate_login] User not found in database")
+        return False
+        
+    # Compare the entered password with stored password
+    password_match = stored_password == password
+    print(f"[validate_login] Password match result: {password_match}")
+    
+    return password_match
 
 
 def main(user_id=None):
@@ -124,24 +156,37 @@ def main(user_id=None):
         image_names: List of recommended movie titles
         image_paths: List of paths to movie poster images
     """
-    # Create main executor
-    executor = MainExec()
-    
-    # Load the model
-    if not executor.load_model():
-        messagebox.showerror("Error", "Failed to load recommendation model")
-        return None, None
-    
-    if user_id is None:
-        # Launch the GUI (this will handle login)
-        window = Window(theme="breeze")
-        window.mainloop()
-    else:
-        # Use the provided user ID to generate recommendations
+    try:
+        # Create main executor
+        executor = MainExec()
+        
+        # Load the model
+        if not executor.load_model():
+            messagebox.showerror("Error", "Failed to load recommendation model")
+            return None, None
+        
+        if user_id is None:
+            # Launch the GUI (this will handle login)
+            window = Window(theme="breeze")
+            window.mainloop()
+            
+            # If login was successful, window.login_dialog.result will be True
+            if not hasattr(window, 'login_dialog') or not window.login_dialog.result:
+                print("Login failed or window was closed")
+                return None, None
+                
+            # Get the logged in user_id for recommendations
+            user_id = window.login_dialog.username.get()
+        
+        # Use the provided/logged-in user ID to generate recommendations
         movie_ids = executor.model(user_id, True, True)
         image_paths, image_names = executor.movie_recommended(movie_ids)
         return image_names, image_paths
-
+        
+    except Exception as e:
+        print(f"Error in main: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
+        return None, None
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,7 @@
 import tkinter as tk
 from tkinter.simpledialog import Dialog
 from tkinter import ttk
-from dotenv import load_dotenv
-load_dotenv()
-import os
+from main_exec import validate_login
 
 
 
@@ -52,17 +50,19 @@ class LoginDialog(Dialog):
         username = self.username.get()
         password = self.password.get()
         
+        print(f"[LoginDialog] Attempting login with username: {username}")
+        
         # 這裡添加您的登入驗證邏輯
-        if self.validate_login(username, password):
+        login_success = validate_login(username, password)
+        print(f"[LoginDialog] Login validation result: {login_success}")
+        
+        if login_success:
+            print("[LoginDialog] Login successful, showing main window")
             self.parent.deiconify()  # 顯示主視窗
             return True
+            
+        print("[LoginDialog] Login failed")
         return False
-
-    def validate_login(self, username, password):
-        """驗證登入資訊"""
-        # 這裡添加您的驗證邏輯
-        
-        return username == os.environ['user_id'] and password == os.environ['password']
 
     def buttonbox(self):
         """自定義按鈕框"""
