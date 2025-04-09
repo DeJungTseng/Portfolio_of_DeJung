@@ -14,7 +14,7 @@ class Window(ThemedTk):
         self.login_dialog = view.LoginDialog(self, title="登入")
         
         # If login failed or was cancelled, close the application
-        if not self.login_dialog.result:
+        if not self.login_dialog.apply():
             print("Login cancelled or failed")
             self.quit()
             self.destroy()  # Ensure window is properly destroyed
