@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter.simpledialog import Dialog
 from tkinter import ttk
-from main_exec import validate_login
+from auth_utils import validate_login
 
 
 
