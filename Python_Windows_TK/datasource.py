@@ -16,17 +16,15 @@ import os
 # plz think how to manange the data structure to get the user watched genres
 def get_watched(user_id):
     conn_params = {
-    'host': os.environ['postgres_host'],
-    'database': os.environ['postgres_db'],
-    'user': os.environ['postgres_user'],
-    'password': os.environ['postgres_password']
+        'host': os.environ['postgres_host'],
+        'database': os.environ['postgres_db'],
+        'user': os.environ['postgres_user'],
+        'password': os.environ['postgres_password']
     }
 
-
-    # SQL 查詢語句
     query = """
-    SELECT DISTINCT movie_title 
-    FROM public.user_movie_data  
+    SELECT DISTINCT movie_title
+    FROM public.user_movie_data
     WHERE user_id = %s 
     ORDER BY movie_title;
     """
@@ -34,20 +32,33 @@ def get_watched(user_id):
     try:
         # 建立資料庫連線
         conn = psycopg2.connect(**conn_params)
-        user_id='hbrpoig8'
+        user_id = user_id.get() if hasattr(user_id, 'get') else user_id
+
         # 執行查詢並轉換為 DataFrame
+        print(f"查詢 user_id: {user_id}")
         watched_movies = pd.read_sql(query, conn, params=(user_id,))
-        
-        return watched_movies
+
+        print("watch_movies 型態：", type(watched_movies))
+        print(watched_movies)  # 顯示 DataFrame 內容
+
+        if watched_movies.empty:
+            print("查詢結果為空，無電影資料")
+
+        # convert pd frame to list
+        watched_movie_list = watched_movies.to_dict(orient='records')
+        print("轉換後的 watched_movie_list：", watched_movie_list)
+
+        return watched_movie_list
 
     except (Exception, psycopg2.Error) as error:
         print("查詢時發生錯誤:", error)
-        return pd.DataFrame()  # 返回空 DataFrame
-
+        return []  # 返回空列表
+        
     finally:
         # 關閉資料庫連線
         if conn:
             conn.close()
+
 
 
 

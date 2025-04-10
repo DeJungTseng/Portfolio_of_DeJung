@@ -46,21 +46,22 @@ class LoginDialog(Dialog):
 
     def apply(self):
         """當用戶點擊確定按鈕時調用"""
-        # 在這裡處理登入邏輯
         username = self.username.get()
         password = self.password.get()
-        
+
         print(f"[LoginDialog] Attempting login with username: {username}")
         
-        # 這裡添加您的登入驗證邏輯
+        # 假設 validate_login() 是驗證登入的邏輯
         login_success = validate_login(username, password)
         print(f"[LoginDialog] Login validation result: {login_success}")
         
         if login_success:
             print("[LoginDialog] Login successful, showing main window")
             self.parent.deiconify()  # 顯示主視窗
+            self.username_str = self.username.get()
+            self.password_str = self.password.get()
             return True
-            
+
         print("[LoginDialog] Login failed")
         return False
 

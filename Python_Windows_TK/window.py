@@ -3,6 +3,7 @@ import tkinter as tk
 from ttkthemes import ThemedTk
 import view
 from tkinter import messagebox
+import datasource
 
 
 class Window(ThemedTk):
@@ -94,16 +95,12 @@ class Window(ThemedTk):
    
 
         # =====Played List Treeview====
+            # =====After====
+        self.after(100, self.load_watched_movies)
+            # ====End After====
         self.played_list = view.TreeViewWidget(self.bottom_frame_right)
-        # movie_title=datasource.get_watched(user_id)
-        # for item in movie_title:
-        #     self.played_list.add_item(item)
-        # movie_title is a pd frame
-        self.played_list.add_item("datasource")
-        self.played_list.add_item("三生三世三十場考試")
-        self.played_list.add_item("我的模型還活著嗎")
-        self.played_list.add_item("南港展覽館官方網站綻放萬丈光芒")
-        self.played_list.add_item("紅鯉魚與綠鯉魚與驢")
+        self.played_list.clear_all()
+
         self.played_list.pack(fill="both", expand=True)
         # =====End Played List Treeview====
 
@@ -116,8 +113,15 @@ class Window(ThemedTk):
         Adds the clicked image's name to the TreeView.
         """
         self.watch_list.add_item(image_name)
-
-
+    
+    def load_watched_movies(self):
+        self.played_list.clear_all()
+        watched_list = datasource.get_watched(self.login_dialog.username)
+        print("已取得 watched_list：", watched_list)
+        for movie in watched_list:
+            print("加入播放清單：", movie['movie_title'])
+            self.played_list.add_item(movie['movie_title'])
+    
 
 def main():
     window = Window(theme="breeze")
