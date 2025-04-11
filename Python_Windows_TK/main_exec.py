@@ -39,54 +39,49 @@ class MainExec:
             return False
     
     def model(self, user_id, gen_mov, gen_mov_id):
-        """
-        Generate movie recommendations based on user ID and preferences
-        
-        Args:
-            user_id: The ID of the current user
-            gen_mov: Boolean to indicate if we should generate movie recommendations
-            gen_mov_id: Boolean to indicate if we should return movie IDs
-            
-        Returns:
-            movie_id: List of recommended movie IDs
-        """
         self.user_id = user_id
-        
-        # Get user watch history
+
         watch_history = datasource.get_watched(user_id)
-        
-        # Get user preferences (genres)
         user_preferences = datasource.get_user_genres(user_id)
-        
-        # Process genres for recommendation
-        processed_genres = datasource.genres_process(user_preferences)
-        
-        # Here, we would use the model to recommend movies
-        # For now, we'll just simulate this with a simple algorithm
-        
-        # Get all available movies
+
+        # 組成 feature row
+        genres = [user_preferences.get(f'genre={i}', 0) for i in range(1, 6)]
+        genre_diversity = sum(1 for g in genres if g > 0)
+        rating_complexity = np.mean(genres) * genre_diversity
+        input_data = pd.DataFrame([{
+            f'genre={i+1}': genres[i] for i in range(5)
+        } | {
+            'genre_diversity': genre_diversity,
+            'rating_complexity': rating_complexity
+        }])
+
+        # 取得所有電影資料
         all_movies = datasource.get_movies()
-        
-        # Filter movies based on user preferences and watch history
-        # This is a simplified version of what would actually happen with your model
-        recommended_movies = []
+
+        # 建立推薦清單
+        scored_movies = []
         for movie in all_movies:
-            # Don't recommend movies the user has already watched
             if movie['movie_id'] not in watch_history['movie_id'].tolist():
-                # Check if it matches any of the user's preferred genres
-                if any(genre in movie['genres'] for genre in processed_genres):
-                    recommended_movies.append(movie)
-                    
-        # Sort by some criteria (e.g., release date, popularity)
-        # For this example, we'll just take the first 5
-        recommended_movies = recommended_movies[:5]
-        
-        # Return the movie IDs if requested
+                movie_genres = movie['genres']  # 假設是 list of genre ID
+                movie_feature = input_data.copy()
+
+                # 如果你想根據每部電影的 genre 重新組成 feature，也可以
+                # 否則就用 user_preferences 預測每部電影的 rating (簡化方式)
+
+                predicted_rating = self.model.predict(movie_feature)[0]
+                scored_movies.append((predicted_rating, movie))
+
+        # 排序並選出 top 5
+        recommended_movies = sorted(scored_movies, reverse=True, key=lambda x: x[0])[:5]
+        result = [movie for _, movie in recommended_movies]
+
         if gen_mov_id:
-            return [movie['movie_id'] for movie in recommended_movies]
+            return [movie['movie_id'] for movie in result]
         else:
-            return recommended_movies
-    
+            return result
+
+
+        
     def movie_recommended(self, movie_id):
         """
         Fetch details about recommended movies
