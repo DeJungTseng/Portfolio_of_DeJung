@@ -26,15 +26,6 @@ class MainExec:
             with open('model/trained_model.pkl', 'rb') as f:
                 self.model = pickle.load(f)
                 print(f"[model type]: {type(self.model)}")
-            
-            # Since we don't have the actual model implementation,
-            # we'll just create a placeholder
-            # print("Loading recommendation model...")
-            # self.model = {
-            #     "type": "random_forest",
-            #     "regression": True,
-            #     "feature_selection": True
-            # }
             return True
         except Exception as e:
             print(f"[loading model]Error loading model: {e}")

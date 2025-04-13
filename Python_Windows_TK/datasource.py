@@ -225,41 +225,7 @@ def get_movie_by_id(movie_id):
         if conn:
             conn.close()
 
-def convert_dataframe_to_movie_list(df):
-    """
-    将 DataFrame 转换为电影列表格式
-    
-    Args:
-        df (pd.DataFrame): 包含电影信息的 DataFrame
-    
-    Returns:
-        list: 电影列表，每个电影是 [movie_id, movie_title, genres, release_date, poster]
-    """
-    movies = []
-    
-    for _, row in df.iterrows():
-        movie = [
-            row['movie_id'],     # 假设有 movie_id 列
-            row['movie_title'],  # 假设有 movie_title 列
-            row['genres'],       # 假设有 genres 列
-            row['release_date'], # 假设有 release_date 列
-            row['movie_poster']        # 假设有 poster 列
-        ]
-        movies.append(movie)
-    
-    return movies
-    
 
-# # 使用方法
-# df = get_movies()
-# movies = convert_dataframe_to_movie_list(df)
-
-# # 如果需要遍历
-# for movie in movies:
-#     movie_id, movie_title, genres, release_date, poster = movie
-#     # 进行后续处理
-
-'''取得movie genre餵進模型'''
 import pandas as pd
 
 
@@ -318,62 +284,6 @@ def get_user_id_pw(username):
         if 'conn' in locals() and conn:
             conn.close()
             print("[get_user_id_pw] Database connection closed")
-
-def get_movie_genres():
-    """
-    取得電影類型分佈並將其轉換為指定格式
-    
-    Returns:
-    pandas.DataFrame: 包含使用者電影類型偏好向量的資料表
-    """
-    # SQL 查詢
-    query = """
-    SELECT 
-        m.movie_id,
-        TRIM(BOTH ',' FROM
-        REPLACE(m.genres, ' ', '')) AS genres
-    FROM public.movie_table m;
-    """
-
-    conn_params = {
-    'host': os.environ['postgres_host'],
-    'database': os.environ['postgres_db'],
-    'user': os.environ['postgres_user'],
-    'password': os.environ['postgres_password']
-    }
-    
-    try:
-        # 使用 Pandas 執行查詢
-        conn = psycopg2.connect(**conn_params)
-        df = pd.read_sql(query, conn)
-        
-        # 轉換 genres 欄位
-        genre_mapping = {
-            'adventure': 1,
-            'affection': 2,
-            'comedy': 3,
-            'horror': 4,
-            'history': 5
-        }
-        
-        # 展開 genres 欄位並計算出現次數
-        df['genre_vector'] = df['genres'].str.split(',').apply(lambda x: [genre_mapping.get(g, 0) for g in x])
-        df['genre_1'] = df['genre_vector'].apply(lambda x: x.count(1))
-        df['genre_2'] = df['genre_vector'].apply(lambda x: x.count(2))
-        df['genre_3'] = df['genre_vector'].apply(lambda x: x.count(3))
-        df['genre_4'] = df['genre_vector'].apply(lambda x: x.count(4))
-        df['genre_5'] = df['genre_vector'].apply(lambda x: x.count(5))
-        
-        # 選取所需欄位
-        return df[['movie_id', 'genre_1', 'genre_2', 'genre_3', 'genre_4', 'genre_5', 'genre_vector']]
-    
-    except Exception as e:
-        print(f"查詢時發生錯誤: {e}")
-        return pd.DataFrame()
-    finally:
-    # 關閉資料庫連線
-        if conn:
-            conn.close()
 
 
 

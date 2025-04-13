@@ -1,21 +1,7 @@
 import bcrypt
 import datasource
 
-def hash_password(password):
-    """Hash a password for storing.
-    
-    Args:
-        password: The password to hash
-        
-    Returns:
-        bytes: The hashed password
-    """
-    # Convert the password to bytes and generate a salt
-    password = password.encode('utf-8')
-    salt = bcrypt.gensalt()
-    
-    # Hash the password with the salt
-    return bcrypt.hashpw(password, salt)
+
 
 def verify_password(plain_password, hashed_password):
     """Verify a stored password against one provided by user.
