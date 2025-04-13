@@ -4,7 +4,7 @@ from ttkthemes import ThemedTk
 import view
 from tkinter import messagebox
 import datasource
-from recommendation_engine import get_recommendation  # ✅ 新增
+from recommendation_engine import get_recommendation  
 
 class Window(ThemedTk):
     def __init__(self, *args, **kwargs):
@@ -57,7 +57,7 @@ class Window(ThemedTk):
         self.top_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=(0, 5))
 
         # ====Top Canvas=====
-        user_id = self.login_dialog.username
+        user_id = self.login_dialog.username.get()
         self.image_names, self.image_paths = get_recommendation(user_id)
 
         self.canvas = view.TopCanvas(
