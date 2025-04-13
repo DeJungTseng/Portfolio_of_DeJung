@@ -24,6 +24,7 @@ class MainExec:
             import pickle
             with open('model/trained_model.pkl', 'rb') as f:
                 self.model = pickle.load(f)
+                print(f"[model type]: {type(self.model)}")
             
             # Since we don't have the actual model implementation,
             # we'll just create a placeholder
@@ -38,48 +39,68 @@ class MainExec:
             print(f"[loading model]Error loading model: {e}")
             return False
     
-    def recommander_model(self, user_id, gen_mov, gen_mov_id):
+    def recommender_model(self, user_id, gen_mov=None, gen_mov_id=False):
         self.user_id = user_id
 
+        # 使用者歷史紀錄與偏好
         watch_history = datasource.get_watched(user_id)
-        user_preferences = datasource.get_user_genres(user_id)
-        print(f"[user preference]{user_preferences}")
+        print(f"[all movies]{watch_history}")
+        watched_titles = [m['movie_title'] for m in watch_history]
+        
+        user_preferences = datasource.get_user_genres(user_id)  # 假設格式為 {'genre=1': 1, ..., 'genre=5': 0}
 
-        # 組成 feature row
-        genres = [user_preferences.get(f'genre={i}', 0) for i in range(1, 6)]
-        genre_diversity = sum(1 for g in genres if g > 0)
-        rating_complexity = np.mean(genres) * genre_diversity
-        input_data = pd.DataFrame([{
-            f'genre={i+1}': genres[i] for i in range(5)
-        } | {
-            'genre_diversity': genre_diversity,
-            'rating_complexity': rating_complexity
-        }])
-
-        # 取得所有電影資料
-        all_movies = datasource.get_movies()
+        # 全部電影資料
+        all_movies = datasource.get_movies().to_dict(orient="records")
+        
 
         # 建立推薦清單
         scored_movies = []
+
+        # 特徵索引（k=3）
+        selected_feature_names = [f'genre={i}' for i in range(1, 6)] + ['genre_diversity', 'rating_complexity']
+
         for movie in all_movies:
-            if movie['movie_id'] not in watch_history['movie_id'].tolist():
-                movie_genres = movie['genres']  # 假設是 list of genre ID
-                movie_feature = input_data.copy()
+            movie_title = movie['movie_title']
+            movie_genres = movie['genres']  # 假設是 dict like {'genre=1': 1, ..., 'genre=5': 0}
 
-                # 如果你想根據每部電影的 genre 重新組成 feature，也可以
-                # 否則就用 user_preferences 預測每部電影的 rating (簡化方式)
+            if movie_title in watched_titles:
+                continue  # 跳過已看過的電影
 
-                predicted_rating = self.model.predict(movie_feature)[0]
-                scored_movies.append((predicted_rating, movie))
+            # 構建電影特徵 row
+            genres = [movie_genres.get(f'genre={i}', 0) for i in range(1, 6)]
+            genre_diversity = sum(1 for g in genres if g > 0)
+            rating_complexity = np.mean(genres) * genre_diversity if genre_diversity > 0 else 0
 
-        # 排序並選出 top 5
+            feature_row = {
+                f'genre={i+1}': genres[i] for i in range(5)
+            }
+            feature_row['genre_diversity'] = genre_diversity
+            feature_row['rating_complexity'] = rating_complexity
+
+            input_df = pd.DataFrame([feature_row])
+
+            # 選取經過特徵選擇後的欄位
+            input_selected = input_df[selected_feature_names]
+
+            # 預測推薦分數
+            predicted_rating = self.model.predict(input_selected)[0]
+            scored_movies.append((predicted_rating, movie))
+
+        # 根據預測分數排序並取前 5
         recommended_movies = sorted(scored_movies, reverse=True, key=lambda x: x[0])[:5]
         result = [movie for _, movie in recommended_movies]
 
+        # 印出推薦結果（debug 用）
+        print(f"\n[使用者 {user_id} 推薦結果]")
+        for i, m in enumerate(result, 1):
+            print(f"{i}. {m['movie_title']} ({m['movie_id']})")
+
+        # 回傳 id 或完整資料
         if gen_mov_id:
             return [movie['movie_id'] for movie in result]
         else:
             return result
+
 
 
         
@@ -147,7 +168,7 @@ def main(user_id=None):
                 return None, None
         
         # Use the provided/logged-in user ID to generate recommendations
-        movie_ids = executor.recommander_model(user_id, True, True)
+        movie_ids = executor.recommender_model(user_id, True, True)
         image_paths, image_names = executor.movie_recommended(movie_ids)
         return image_names, image_paths
         

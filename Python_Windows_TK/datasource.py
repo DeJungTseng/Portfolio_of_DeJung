@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 '''
 接收user login資料之user_id，以sql由user_table取得user_id之觀看電影紀錄。
@@ -134,10 +135,9 @@ def get_movies():
     pandas.DataFrame: 包含最近上映電影資訊的資料框
     """
     # initialize conn
-    conn=None
-    # 計算 14 天前的日期
+    conn = None
     recent_date = datetime.now() - timedelta(days=14)
-    
+
     # SQL 查詢語句
     query = """
     SELECT *
@@ -146,22 +146,36 @@ def get_movies():
     ORDER BY release_date DESC;
     """
     conn_params = {
-    'host': os.environ['postgres_host'],
-    'database': os.environ['postgres_db'],
-    'user': os.environ['postgres_user'],
-    'password': os.environ['postgres_password']
+        'host': os.environ['postgres_host'],
+        'database': os.environ['postgres_db'],
+        'user': os.environ['postgres_user'],
+        'password': os.environ['postgres_password']
     }
 
     try:
         # 使用 Pandas 執行查詢
         conn = psycopg2.connect(**conn_params)
         df = pd.read_sql(query, conn, params=[recent_date.strftime('%Y-%m-%d %H:%M:%S')])
+
+        # 處理 genres 欄位：轉換為 one-hot dict
+        def parse_genres(genres_str):
+            # 初始化 genre=1 到 genre=5
+            genre_dict = {f'genre={i}': 0 for i in range(1, 6)}
+            if isinstance(genres_str, str):
+                for g in genres_str.split(','):
+                    g = g.strip()
+                    if g in genre_dict:
+                        genre_dict[g] = 1
+            return genre_dict
+
+        df['genres'] = df['genres'].apply(parse_genres)
         return df
+
     except Exception as e:
         print(f"查詢時發生錯誤: {e}")
         return pd.DataFrame()
+
     finally:
-    # 關閉資料庫連線
         if conn:
             conn.close()
 
