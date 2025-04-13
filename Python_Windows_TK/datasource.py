@@ -179,6 +179,52 @@ def get_movies():
         if conn:
             conn.close()
 
+def get_movie_by_id(movie_id):
+    """
+    根據 movie_id 查詢電影名稱與海報路徑
+
+    Args:
+        movie_id (str): 電影的唯一識別碼
+
+    Returns:
+        dict: 包含 'movie_title' 與 'movie_poster' 的字典，如查無資料回傳 None
+    """
+    conn_params = {
+        'host': os.environ['postgres_host'],
+        'database': os.environ['postgres_db'],
+        'user': os.environ['postgres_user'],
+        'password': os.environ['postgres_password']
+    }
+
+    query = """
+    SELECT movie_title, movie_poster
+    FROM public.movie_table
+    WHERE movie_id = %s
+    LIMIT 1;
+    """
+
+    conn = None
+    try:
+        conn = psycopg2.connect(**conn_params)
+        with conn.cursor() as cur:
+            cur.execute(query, (movie_id,))
+            row = cur.fetchone()
+            if row:
+                return {
+                    'movie_title': row[0],
+                    'movie_poster': row[1]
+                }
+            else:
+                return None
+
+    except Exception as e:
+        print(f"查詢 movie_id={movie_id} 發生錯誤: {e}")
+        return None
+
+    finally:
+        if conn:
+            conn.close()
+
 def convert_dataframe_to_movie_list(df):
     """
     将 DataFrame 转换为电影列表格式

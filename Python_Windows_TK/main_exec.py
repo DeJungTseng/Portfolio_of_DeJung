@@ -170,6 +170,7 @@ def main(user_id=None):
         # Use the provided/logged-in user ID to generate recommendations
         movie_ids = executor.recommender_model(user_id, True, True)
         image_paths, image_names = executor.movie_recommended(movie_ids)
+        print(f"[image_names]: {image_names},[image_paths]:{image_paths}")
         return image_names, image_paths
         
     except Exception as e:
