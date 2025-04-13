@@ -58,14 +58,14 @@ class Window(ThemedTk):
 
         # ====Top Canvas=====
         # get the recommandation from the backend
-        # image_names,image_paths=main_exec.main(user_id=self.login_dialog.user_id)
-        # self.image_names=image_names
-        # self.image_paths=image_paths
-        self.image_paths = ["Images/AI_and_ai.jpg", "Images/lawyerhell.jpg", "Images/library.jpg","Images/gandam.jpg","Images/goose.jpg"]
-        self.image_names = ["AI與小愛", "地獄律師", "圖書館裡的妖精","鋼彈吊單槓","以鵝傳鵝"]
+        image_names,image_paths=main_exec.main(user_id=self.login_dialog.user_id)
+        self.image_names=image_names
+        self.image_paths=image_paths
+        # self.image_paths = ["Images/AI_and_ai.jpg", "Images/lawyerhell.jpg", "Images/library.jpg","Images/gandam.jpg","Images/goose.jpg"]
+        # self.image_names = ["AI與小愛", "地獄律師", "圖書館裡的妖精","鋼彈吊單槓","以鵝傳鵝"]
 
-        # self.image_paths =["Images/"+item['poster']]
-        # self.image_names = ["movie_title"]
+        self.image_paths =["Images/"+item['poster']]
+        self.image_names = ["movie_title"]
 
         self.canvas = view.TopCanvas(self.top_frame, self.image_paths, self.image_names, self.add_to_watchlist,height=400,bg='white' )
         self.canvas.pack(fill="both", expand=True)
