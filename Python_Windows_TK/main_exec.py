@@ -35,14 +35,15 @@ class MainExec:
             # }
             return True
         except Exception as e:
-            print(f"Error loading model: {e}")
+            print(f"[loading model]Error loading model: {e}")
             return False
     
-    def model(self, user_id, gen_mov, gen_mov_id):
+    def recommander_model(self, user_id, gen_mov, gen_mov_id):
         self.user_id = user_id
 
         watch_history = datasource.get_watched(user_id)
         user_preferences = datasource.get_user_genres(user_id)
+        print(f"[user preference]{user_preferences}")
 
         # 組成 feature row
         genres = [user_preferences.get(f'genre={i}', 0) for i in range(1, 6)]
@@ -146,7 +147,7 @@ def main(user_id=None):
                 return None, None
         
         # Use the provided/logged-in user ID to generate recommendations
-        movie_ids = executor.model(user_id, True, True)
+        movie_ids = executor.recommander_model(user_id, True, True)
         image_paths, image_names = executor.movie_recommended(movie_ids)
         return image_names, image_paths
         

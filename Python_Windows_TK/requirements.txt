@@ -1,6 +1,6 @@
 pandas
 ttkthemes
-
+numpy
 pillow
 tkintermapview
 python-dotenv
@@ -12,3 +12,4 @@ dash_bootstrap_components
 dash
 flask
 pickle
+collections
