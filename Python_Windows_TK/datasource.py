@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 '''
 接收user login資料之user_id，以sql由user_table取得user_id之觀看電影紀錄。
-以(Type)傳給Main_exec.py中的data_process功能。
+以(Type)傳給Model_exec.py中的data_process功能。
 '''
 
 # plz think how to manange the data structure to get the user watched genres

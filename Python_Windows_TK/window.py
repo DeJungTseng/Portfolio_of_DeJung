@@ -116,9 +116,9 @@ class Window(ThemedTk):
             self.played_list.add_item(movie['movie_title'])
 
 
-def main():
-    window = Window(theme="breeze")
-    window.mainloop()
+# def main():
+#     window = Window(theme="breeze")
+#     window.mainloop()
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

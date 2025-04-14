@@ -1,5 +1,5 @@
 # recommendation_engine.py
-from main_exec import MainExec
+from model_exec import ModelExec
 
 def get_recommendation(user_id):
     """
@@ -11,9 +11,9 @@ def get_recommendation(user_id):
     Returns:
         tuple: (image_names, image_paths)
     """
-    executor = MainExec()
+    executor = ModelExec()
     if not executor.load_model():
-        print("❌ 無法載入模型")
+        print("無法載入模型")
         return [], []
 
     movie_ids = executor.recommender_model(user_id=user_id, gen_mov=True, gen_mov_id=True)

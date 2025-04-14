@@ -10,7 +10,7 @@ import os
 
 load_dotenv()
 
-class MainExec:
+class ModelExec:
     def __init__(self):
         self.type = "movie_recommendation"
         self.model = None
@@ -119,56 +119,50 @@ class MainExec:
         
         return image_paths, image_names
     
-    def movie_process(self):
-        """Process movie data for recommendation"""
-        # This could include data preprocessing, normalization, etc.
-        print("Processing movie data...")
-        # Placeholder for now
-        return True
-        
-def main(user_id=None):
-    """
-    Main function to run the application
-    
-    Args:
-        user_id: Optional user ID to bypass login
-        
-    Returns:
-        image_names: List of recommended movie titles
-        image_paths: List of paths to movie poster images
-    """
-    try:
-        # Create main executor
-        executor = MainExec()
-        
-        # Load the model
-        if not executor.load_model():
-            messagebox.showerror("Error", "Failed to load recommendation model")
-            return None, None
-        
-        if user_id is None:
-            # Launch the GUI (this will handle login)
-            window = Window(theme="breeze")
-            
-            # The Window class now handles the login process in its __init__
-            # If the window was created successfully, get the user_id
-            if hasattr(window, 'login_dialog') and window.login_dialog.apply():
-                user_id = window.login_dialog.username.get()
-                window.mainloop()
-            else:
-                print("Login failed or window was closed")
-                return None, None
-        
-        # Use the provided/logged-in user ID to generate recommendations
-        movie_ids = executor.recommender_model(user_id, True, True)
-        image_paths, image_names = executor.movie_recommended(movie_ids)
-        # print(f"[image_names]: {image_names},[image_paths]:{image_paths}")
-        return image_names, image_paths
-        
-    except Exception as e:
-        print(f"Error in main: {e}")
-        messagebox.showerror("Error", f"An error occurred: {e}")
-        return None, None
 
-if __name__ == "__main__":
-    main()
+# def main(user_id=None):
+#     """
+#     Main function to run the application
+    
+#     Args:
+#         user_id: Optional user ID to bypass login
+        
+#     Returns:
+#         image_names: List of recommended movie titles
+#         image_paths: List of paths to movie poster images
+#     """
+#     try:
+#         # Create main executor
+#         executor = ModelExec()
+        
+#         # Load the model
+#         if not executor.load_model():
+#             messagebox.showerror("Error", "Failed to load recommendation model")
+#             return None, None
+        
+#         if user_id is None:
+#             # Launch the GUI (this will handle login)
+#             window = Window(theme="breeze")
+            
+#             # The Window class now handles the login process in its __init__
+#             # If the window was created successfully, get the user_id
+#             if hasattr(window, 'login_dialog') and window.login_dialog.apply():
+#                 user_id = window.login_dialog.username.get()
+#                 window.mainloop()
+#             else:
+#                 print("Login failed or window was closed")
+#                 return None, None
+        
+#         # Use the provided/logged-in user ID to generate recommendations
+#         movie_ids = executor.recommender_model(user_id, True, True)
+#         image_paths, image_names = executor.movie_recommended(movie_ids)
+#         # print(f"[image_names]: {image_names},[image_paths]:{image_paths}")
+#         return image_names, image_paths
+        
+#     except Exception as e:
+#         print(f"Error in main: {e}")
+#         messagebox.showerror("Error", f"An error occurred: {e}")
+#         return None, None
+
+# if __name__ == "__main__":
+#     main()
