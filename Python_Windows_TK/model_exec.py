@@ -40,6 +40,7 @@ class ModelExec:
         watched_titles = [m['movie_title'] for m in watch_history]
         
         user_preferences = datasource.get_user_genres(user_id)  # 假設格式為 {'genre=1': 1, ..., 'genre=5': 0}
+        print(f"[user preferences]{user_preferences}")
 
         # 全部電影資料
         all_movies = datasource.get_movies().to_dict(orient="records")
@@ -54,29 +55,45 @@ class ModelExec:
         for movie in all_movies:
             movie_title = movie['movie_title']
             movie_genres = movie['genres']  # 假設是 dict like {'genre=1': 1, ..., 'genre=5': 0}
+            print(f"[movie_genres] {movie_genres} ({type(movie_genres)})")
 
             if movie_title in watched_titles:
                 continue  # 跳過已看過的電影
 
-            # 構建電影特徵 row
-            genres = [movie_genres.get(f'genre={i}', 0) for i in range(1, 6)]
-            genre_diversity = sum(1 for g in genres if g > 0)
-            rating_complexity = np.mean(genres) * genre_diversity if genre_diversity > 0 else 0
+            # # 有模型的版本:構建電影特徵 row
+            # genres = [user_preferences.get(f'genre={i}', 0) for i in range(1, 6)]
+            # genre_diversity = sum(1 for g in genres if g > 0)
+            # rating_complexity = np.mean(genres) * genre_diversity if genre_diversity > 0 else 0
 
-            feature_row = {
-                f'genre={i+1}': genres[i] for i in range(5)
-            }
-            feature_row['genre_diversity'] = genre_diversity
-            feature_row['rating_complexity'] = rating_complexity
+            # feature_row = {
+            #     f'genre={i+1}': genres[i] for i in range(5)
+            # }
+            # feature_row['genre_diversity'] = genre_diversity
+            # feature_row['rating_complexity'] = rating_complexity
 
-            input_df = pd.DataFrame([feature_row])
+            # input_df = pd.DataFrame([feature_row])
+            # input_selected = input_df[selected_feature_names]
 
-            # 選取經過特徵選擇後的欄位
-            input_selected = input_df[selected_feature_names]
+            # # 預測推薦分數
+            # predicted_rating = self.model.predict(input_selected)[0]
+            # scored_movies.append((predicted_rating, movie))
+            ## ======End 有模型的版本======
 
-            # 預測推薦分數
-            predicted_rating = self.model.predict(input_selected)[0]
-            scored_movies.append((predicted_rating, movie))
+            # ======沒有模型的版本:用genre向量來配對電影偏好=======
+            # 使用者偏好向量
+            user_vec = np.array([user_preferences.get(f'genre={i}', 0) for i in range(1, 6)])
+
+            # 電影類型向量（假設是 one-hot dict）
+            movie_vec = np.array([movie_genres.get(f'genre={i}', 0) for i in range(1, 6)])
+
+            # 相似度分數：偏好與電影類型的匹配度
+            match_score = np.dot(user_vec, movie_vec)
+
+            scored_movies.append((match_score, movie))
+            # ======End 沒有模型的版本=======
+
+
+
 
         # 根據預測分數排序並取前 5
         recommended_movies = sorted(scored_movies, reverse=True, key=lambda x: x[0])[:5]

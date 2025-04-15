@@ -156,19 +156,27 @@ def get_movies():
         # 使用 Pandas 執行查詢
         conn = psycopg2.connect(**conn_params)
         df = pd.read_sql(query, conn, params=[recent_date.strftime('%Y-%m-%d %H:%M:%S')])
+        # genre_mapping 對應
+        genre_mapping = {
+            "adventure": "genre=1",
+            "affection": "genre=2",
+            "comedy": "genre=3",
+            "horror": "genre=4",
+            "history": "genre=5"
+        }
 
-        # 處理 genres 欄位：轉換為 one-hot dict
-        def parse_genres(genres_str):
-            # 初始化 genre=1 到 genre=5
-            genre_dict = {f'genre={i}': 0 for i in range(1, 6)}
-            if isinstance(genres_str, str):
-                for g in genres_str.split(','):
-                    g = g.strip()
-                    if g in genre_dict:
-                        genre_dict[g] = 1
+        def convert_genre_to_dict(genre_string):
+            genre_list = genre_string.split(",") if genre_string else []
+            genre_dict = {g: 0 for g in genre_mapping.values()}
+            for g in genre_list:
+                mapped = genre_mapping.get(g.strip())
+                if mapped:
+                    genre_dict[mapped] = 1
             return genre_dict
 
-        df['genres'] = df['genres'].apply(parse_genres)
+        # 將每列轉為 dict
+        df["genres"] = df["genres"].apply(convert_genre_to_dict)
+
         return df
 
     except Exception as e:
