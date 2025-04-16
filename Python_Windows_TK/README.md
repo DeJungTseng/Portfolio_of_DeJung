@@ -56,3 +56,13 @@ pip install -r requirements.txt
 
 # Start the app
 python main.py
+
+## 🧪 Mock Mode Support
+
+If the app cannot connect to a PostgreSQL database, it will automatically switch to **mock mode**, where:
+
+- Users `ddd` and `eee` can log in using passwords `DDD` and `EEE`
+- Watch history and recommendations are generated from predefined mock data
+
+This allows users to explore the interface and functionality **without setting up a database**.
+
