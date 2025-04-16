@@ -111,7 +111,7 @@ class Window(ThemedTk):
 
     def load_watched_movies(self):
         self.played_list.clear_all()
-        watched_list = datasource.get_watched(self.login_dialog.username)
+        watched_list = datasource.get_watched(self.login_dialog.username.get())
         for movie in watched_list:
             self.played_list.add_item(movie['movie_title'])
 
