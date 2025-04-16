@@ -10,6 +10,42 @@ import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 
+MOCK_MODE = os.getenv("MOCK_MODE", "false").lower() == "true"
+
+# ================= Mock Data 定義 ================= #
+
+mock_users = {
+    'ddd': {'genre=1': 2, 'genre=2': 1, 'genre=3': 3, 'genre=4': 0, 'genre=5': 1},
+    'eee': {'genre=1': 1, 'genre=2': 2, 'genre=3': 1, 'genre=4': 2, 'genre=5': 1},
+}
+
+mock_movies = [
+    {
+        'movie_id': '000019',
+        'movie_title': '貓狗雨',
+        'genres': {'genre=1': 1, 'genre=2': 0, 'genre=3': 1, 'genre=4': 0, 'genre=5': 0},
+        'release_date': '2025-04-01',
+        'movie_poster': 'rains.png'
+    },
+    {
+        'movie_id': '000018',
+        'movie_title': '彗星一笑',
+        'genres': {'genre=1': 0, 'genre=2': 1, 'genre=3': 1, 'genre=4': 0, 'genre=5': 0},
+        'release_date': '2025-04-02',
+        'movie_poster': 'comet.png'
+    }
+]
+
+mock_watched = {
+    'ddd': [{'movie_title': '貓狗雨'}],
+    'eee': [{'movie_title': '彗星一笑'}]
+}
+
+mock_user_pw = {
+    'ddd': ('ddd', '$2b$12$2QajnHIyw8V9fAA0nniz1.mPa/2.Qi8DOGaUAh0Q.rU8cxLLiCU22'),
+    'eee': ('eee', '$2b$12$f3kHUNBeobDNRBUR.PMAGuAtnhGxP7wEW3GtcZUOapAiVh51PTUtG')
+}
+
 '''
 接收user login資料之user_id，以sql由user_table取得user_id之觀看電影紀錄。
 以(Type)傳給Model_exec.py中的data_process功能。
@@ -17,6 +53,11 @@ from datetime import datetime, timedelta
 
 # plz think how to manange the data structure to get the user watched genres
 def get_watched(user_id):
+    if MOCK_MODE:
+        print(f"🔧 Mock Mode 啟用：get_watched({user_id})")
+        return mock_watched.get(user_id, [])
+
+    # === 真實資料庫模式 ===
     conn_params = {
         'host': os.environ['postgres_host'],
         'database': os.environ['postgres_db'],
@@ -31,33 +72,22 @@ def get_watched(user_id):
     ORDER BY movie_title;
     """
 
+    conn = None
     try:
-        # 建立資料庫連線
         conn = psycopg2.connect(**conn_params)
         user_id = user_id.get() if hasattr(user_id, 'get') else user_id
-
-        # 執行查詢並轉換為 DataFrame
-        # print(f"查詢 user_id: {user_id}")
         watched_movies = pd.read_sql(query, conn, params=(user_id,))
 
-        # print("watch_movies 型態：", type(watched_movies))
-        # print(watched_movies)  # 顯示 DataFrame 內容
-
         if watched_movies.empty:
-            print("查詢結果為空，無電影資料")
+            print(f"[{user_id}] 查無觀看紀錄")
 
-        # convert pd frame to list
-        watched_movie_list = watched_movies.to_dict(orient='records')
-        # print("轉換後的 watched_movie_list：", watched_movie_list)
+        return watched_movies.to_dict(orient='records')
 
-        return watched_movie_list
+    except Exception as e:
+        print(f"❌ 資料庫錯誤: {e}")
+        return []
 
-    except (Exception, psycopg2.Error) as error:
-        print("查詢時發生錯誤:", error)
-        return []  # 返回空列表
-        
     finally:
-        # 關閉資料庫連線
         if conn:
             conn.close()
 
@@ -68,6 +98,9 @@ def get_watched(user_id):
 依照model output genres(變數)，以SQL於movie_table中選取release date在30日內，具有model output genre的movie_id, movie_name, poster
 '''
 def get_user_genres(user_id):
+    if MOCK_MODE: 
+        return mock_users.get(user_id, {f'genre={i}': 0 for i in range(1, 6)})
+    # ====真實資料庫====
     conn_params = {
     'host': os.environ['postgres_host'],
     'database': os.environ['postgres_db'],
@@ -91,6 +124,7 @@ def get_user_genres(user_id):
     FROM public.user_movie_data
     WHERE user_id = %s;
     """
+    conn = None
 
     try:
         conn = psycopg2.connect(**conn_params)
@@ -134,6 +168,9 @@ def get_movies():
     Returns:
     pandas.DataFrame: 包含最近上映電影資訊的資料框
     """
+    if MOCK_MODE: 
+        return pd.DataFrame(mock_movies)
+    
     # initialize conn
     conn = None
     recent_date = datetime.now() - timedelta(days=14)
@@ -197,6 +234,9 @@ def get_movie_by_id(movie_id):
     Returns:
         dict: 包含 'movie_title' 與 'movie_poster' 的字典，如查無資料回傳 None
     """
+    if MOCK_MODE: 
+        return next(({'movie_title': m['movie_title'], 'movie_poster': m['movie_poster']} for m in mock_movies if m['movie_id'] == movie_id), None)
+    
     conn_params = {
         'host': os.environ['postgres_host'],
         'database': os.environ['postgres_db'],
@@ -248,6 +288,9 @@ def get_user_id_pw(username):
         tuple: (user_id, password) if found, (None, None) if not found or error
     """
     # print(f"[get_user_id_pw] Looking up credentials for username: {username}")
+    if MOCK_MODE: 
+        print(f"✅ Mock Mode 啟用：{MOCK_MODE}")
+        return mock_user_pw.get(username, (None, None))
     
     try:
         conn_params = {
