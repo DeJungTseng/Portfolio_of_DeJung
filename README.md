@@ -41,18 +41,18 @@ A content-based video recommendation system with a graphical interface built usi
 
 This system integrates a Tkinter-based GUI with a content-based video recommendation engine, incorporating secure login, user history analysis, and random forest model predictions.
 
-![Software Architecture Diagram](./docs/software_architecture.png)
+![Software Architecture Diagram](./Python_Windows_TK/docs/software_architecture.png)
 
 
 ## 🖼️ Demo
 - **Login**  
-  ![UI Login](./docs/login.png)
+  ![UI Login](./Python_Windows_TK/docs/login.png)
 
 - **Recommendation for User 1**  
-  ![Recommendation User 1](./docs/recommend_a.jpg)
+  ![Recommendation User 1](./Python_Windows_TK/docs/recommend_a.jpg)
 
 - **Recommendation for User 2**  
-  ![Recommendation User 2](./docs/recommend_b.jpg) 
+  ![Recommendation User 2](./Python_Windows_TK/docs/recommend_b.jpg) 
 _Run `python mian.py` to launch the interface._
 
 ## 🚀 Getting Started
